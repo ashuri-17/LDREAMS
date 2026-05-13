@@ -71,9 +71,6 @@ jobs:
       - name: Create local.properties
         run: echo "sdk.dir=$ANDROID_HOME" > local.properties
 
-      - name: Build Release APK
-        run: ./gradlew assembleRelease
-
       - name: Generate keystore for signing
         run: |
           keytool -genkey -v -keystore release.keystore \
@@ -81,6 +78,17 @@ jobs:
             -validity 10000 -storepass ldreams123 \
             -keypass ldreams123 \
             -dname "CN=LDREAMS, OU=Development, O=LDREAMS, L=Unknown, ST=Unknown, C=US"
+        env:
+          STORE_PASSWORD: ldreams123
+          KEY_ALIAS: ldreams
+          KEY_PASSWORD: ldreams123
+
+      - name: Build Release APK
+        run: ./gradlew assembleRelease
+        env:
+          STORE_PASSWORD: ldreams123
+          KEY_ALIAS: ldreams
+          KEY_PASSWORD: ldreams123
 
       - name: Create Release Tag
         run: echo "RELEASE_TAG=v1.0.0-$(date +'%Y%m%d-%H%M')" >> $GITHUB_ENV
