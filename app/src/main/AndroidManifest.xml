@@ -33,18 +33,7 @@
             </intent-filter>
         </activity>
 
-        <receiver
-            android:name=".service.BootReceiver"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-            </intent-filter>
-        </receiver>
-
-        <service
-            android:name=".service.RealityCheckService"
-            android:exported="false"
-            android:foregroundServiceType="dataSync" />
+        <!-- WorkManager auto-initializes and persists across reboots -->
 
     </application>
 

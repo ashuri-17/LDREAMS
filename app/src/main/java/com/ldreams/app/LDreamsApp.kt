@@ -4,6 +4,7 @@ import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.os.Build
+import com.ldreams.app.service.NotificationScheduler
 import dagger.hilt.android.HiltAndroidApp
 
 @HiltAndroidApp
@@ -11,6 +12,7 @@ class LDreamsApp : Application() {
     override fun onCreate() {
         super.onCreate()
         createNotificationChannels()
+        scheduleDefaultNotifications()
     }
 
     private fun createNotificationChannels() {
@@ -23,6 +25,7 @@ class LDreamsApp : Application() {
         ).apply {
             description = "Random reality check reminders throughout the day"
             enableVibration(true)
+            enableLights(true)
         }
 
         val morningReminderChannel = NotificationChannel(
@@ -47,6 +50,12 @@ class LDreamsApp : Application() {
                 listOf(realityCheckChannel, morningReminderChannel, bedtimeChannel)
             )
         }
+    }
+
+    private fun scheduleDefaultNotifications() {
+        NotificationScheduler.scheduleRealityChecks(this)
+        NotificationScheduler.scheduleMorningReminder(this)
+        NotificationScheduler.scheduleBedtimeReminder(this)
     }
 
     companion object {
