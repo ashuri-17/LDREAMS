@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import com.ldreams.app.ui.theme.GradientEnd
 import com.ldreams.app.ui.theme.GradientMid
 import com.ldreams.app.ui.theme.GradientStart
+import androidx.compose.ui.unit.dp
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.random.Random
