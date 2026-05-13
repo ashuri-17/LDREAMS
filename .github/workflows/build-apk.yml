@@ -24,14 +24,16 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
       - name: Create local.properties
-        run: |
-          echo "sdk.dir=$ANDROID_HOME" > local.properties
+        run: echo "sdk.dir=$ANDROID_HOME" > local.properties
 
-      - name: Build with Gradle
+      - name: Build Debug APK
         run: ./gradlew assembleDebug
 
       - name: Upload Debug APK
@@ -60,28 +62,28 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
       - name: Create local.properties
-        run: |
-          echo "sdk.dir=$ANDROID_HOME" > local.properties
+        run: echo "sdk.dir=$ANDROID_HOME" > local.properties
 
       - name: Build Release APK
         run: ./gradlew assembleRelease
 
-      - name: Sign APK
+      - name: Generate keystore for signing
         run: |
-          # Generate a debug keystore for release builds
-          keytool -genkey -v -keystore release.keystore -alias ldreams -keyalg RSA -keysize 2048 -validity 10000 -storepass ldreams123 -keypass ldreams123 -dname "CN=LDREAMS, OU=Development, O=LDREAMS, L=Unknown, ST=Unknown, C=US"
-          echo "storePassword=ldreams123" > keystore.properties
-          echo "keyPassword=ldreams123" >> keystore.properties
-          echo "keyAlias=ldreams" >> keystore.properties
-          echo "storeFile=release.keystore" >> keystore.properties
+          keytool -genkey -v -keystore release.keystore \
+            -alias ldreams -keyalg RSA -keysize 2048 \
+            -validity 10000 -storepass ldreams123 \
+            -keypass ldreams123 \
+            -dname "CN=LDREAMS, OU=Development, O=LDREAMS, L=Unknown, ST=Unknown, C=US"
 
       - name: Create Release Tag
-        run: |
-          echo "RELEASE_TAG=v1.0.0-$(date +'%Y%m%d-%H%M')" >> $GITHUB_ENV
+        run: echo "RELEASE_TAG=v1.0.0-$(date +'%Y%m%d-%H%M')" >> $GITHUB_ENV
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
@@ -92,17 +94,13 @@ jobs:
             ## LDREAMS - Lucid Dreaming Companion
 
             ### Features:
-            - 📓 Dream Journal with rich entry tracking
-            - 🔮 AI Dream Analysis with pattern detection
-            - 📊 Lucidity Tracker with progress metrics
-            - ✅ Reality Check system with notifications
-            - ⏰ Morning & bedtime reminders
-            - 🎮 Gamification with XP and levels
-            - 🎯 Guided lucid dreaming techniques
-            - 🌙 Dark dream-like aesthetic UI
-
-            ### Notes:
-            - This is a development release. The APK is unsigned.
-            - For production releases, sign with your own keystore.
+            - Dream Journal with rich entry tracking
+            - Dream Analysis with pattern detection
+            - Lucidity Tracker with progress metrics
+            - Reality Check system with notifications
+            - Morning & bedtime reminders
+            - Gamification with XP and levels
+            - Guided lucid dreaming techniques
+            - Dark dream-like aesthetic UI
           files: app/build/outputs/apk/release/*.apk
           generate_release_notes: true
