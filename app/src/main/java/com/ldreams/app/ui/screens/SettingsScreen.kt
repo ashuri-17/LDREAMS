@@ -56,7 +56,7 @@ fun SettingsScreen(
     navController: NavController,
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
-    val prefs by viewModel.preferences.collectAsState()
+    val prefs by viewModel.preferences.collectAsState(initial = com.ldreams.app.data.repository.UserPreferences())
 
     Scaffold(
         containerColor = Color.Transparent,

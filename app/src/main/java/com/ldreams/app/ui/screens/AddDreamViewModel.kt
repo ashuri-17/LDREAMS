@@ -36,7 +36,7 @@ class AddDreamViewModel @Inject constructor(
                 mood = mood,
                 tags = tags
             )
-            val xp = dreamRepository.saveDream(dream)
+            val xp = dreamRepository.saveDream(dream).toInt()
             preferencesRepository.addXp(xp)
             // Update streak
             updateStreak()

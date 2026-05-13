@@ -27,7 +27,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -45,7 +47,7 @@ fun DreamAnalysisScreen(
     navController: NavController,
     viewModel: DreamAnalysisViewModel = hiltViewModel()
 ) {
-    val analysis by viewModel.analysis
+    val analysis by viewModel.analysis.collectAsState()
 
     Scaffold(
         containerColor = Color.Transparent,
@@ -148,7 +150,7 @@ fun DreamAnalysisScreen(
                                     )
                                 }
                                 Spacer(modifier = Modifier.height(8.dp))
-                                data.recurringThemes.forEach { theme ->
+                                for (theme in data.recurringThemes) {
                                     Text(
                                         text = "• $theme",
                                         style = MaterialTheme.typography.bodyMedium,
@@ -181,7 +183,9 @@ fun DreamAnalysisScreen(
                                     )
                                 }
                                 Spacer(modifier = Modifier.height(8.dp))
-                                data.commonEmotions.forEach { (emotion, count) ->
+                                for (item in data.commonEmotions) {
+                                    val emotion = item.first
+                                    val count = item.second
                                     Text(
                                         text = "• $emotion ($count times)",
                                         style = MaterialTheme.typography.bodyMedium,
@@ -220,7 +224,7 @@ fun DreamAnalysisScreen(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                                 )
                                 Spacer(modifier = Modifier.height(4.dp))
-                                data.dreamSigns.forEach { sign ->
+                                for (sign in data.dreamSigns) {
                                     Text(
                                         text = "• $sign",
                                         style = MaterialTheme.typography.bodyMedium,

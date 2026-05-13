@@ -2,6 +2,7 @@ package com.ldreams.app.data.repository
 
 import android.content.Context
 import androidx.datastore.preferences.core.booleanPreferencesKey
+import dagger.hilt.android.qualifiers.ApplicationContext
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -36,7 +37,7 @@ data class UserPreferences(
 
 @Singleton
 class UserPreferencesRepository @Inject constructor(
-    private val context: Context
+    @ApplicationContext private val context: Context
 ) {
     private object Keys {
         val REALITY_CHECK_ENABLED = booleanPreferencesKey("reality_check_enabled")

@@ -18,7 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Bedtime
 import androidx.compose.material.icons.filled.Bolt
-import androidx.compose.material.icons.filled.Nightmare
+import androidx.compose.material.icons.filled.Bedtime
 import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -90,6 +90,7 @@ fun DreamCard(
                                 .clip(CircleShape)
                                 .background(Color(0xFFEF4444))
                         )
+                        Spacer(modifier = Modifier.width(4.dp))
                     }
                 }
             }

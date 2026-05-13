@@ -41,6 +41,17 @@ fun DreamBackground(modifier: Modifier = Modifier) {
         label = "bg_anim"
     )
 
+    val starPositions = remember {
+        val count = 80
+        val sz = androidx.compose.ui.geometry.Size(1080f, 1920f)
+        List(count) {
+            Offset(
+                Random.nextFloat() * sz.width,
+                Random.nextFloat() * sz.height * 0.8f
+            )
+        }
+    }
+
     Canvas(modifier = modifier.fillMaxSize()) {
         val gradient = Brush.verticalGradient(
             colors = listOf(GradientStart, GradientMid, GradientEnd)
@@ -87,16 +98,6 @@ fun DreamBackground(modifier: Modifier = Modifier) {
         )
 
         // Stars
-        val starCount = 80
-        val starPositions = remember {
-            List(starCount) {
-                Offset(
-                    Random.nextFloat() * size.width,
-                    Random.nextFloat() * size.height * 0.8f
-                )
-            }
-        }
-
         starPositions.forEachIndexed { index, pos ->
             val twinkle = sin(phase.toFloat() + index * 0.5f) * 0.5f + 0.5f
             val alpha = twinkle * 0.8f
