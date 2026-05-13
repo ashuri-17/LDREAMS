@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.ldreams.app.ui.components.DreamBackground
+import com.ldreams.app.ui.components.DreamCharts
 import com.ldreams.app.ui.theme.DreamGold
 import com.ldreams.app.ui.theme.LucidGreen
 import com.ldreams.app.ui.theme.NeonCyan
@@ -177,6 +178,21 @@ fun LucidityTrackerScreen(
                         modifier = Modifier.weight(1f)
                     )
                 }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // ---- Statistics Charts ----
+                val allDreams by viewModel.allDreams.collectAsState(initial = emptyList())
+                val rcCompleted by viewModel.rcCompleted.collectAsState(initial = 0)
+                val rcTotal by viewModel.rcTotal.collectAsState(initial = 0)
+
+                DreamCharts(
+                    dreams = allDreams,
+                    totalDreams = stats.totalDreams,
+                    lucidDreamCount = stats.totalLucidDreams,
+                    completedRealityChecks = rcCompleted,
+                    totalRealityChecks = rcTotal
+                )
 
                 Spacer(modifier = Modifier.height(24.dp))
 

@@ -33,6 +33,8 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -52,6 +54,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.ldreams.app.data.models.DreamMood
+import com.ldreams.app.ui.components.VoiceInputButton
 import com.ldreams.app.ui.theme.DreamGold
 import com.ldreams.app.ui.theme.LucidGreen
 import com.ldreams.app.ui.theme.NeonCyan
@@ -75,11 +78,13 @@ fun AddDreamScreen(
     var selectedTags by remember { mutableStateOf(setOf<String>()) }
     var isSaving by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     val availableTags = listOf("vivid", "nightmare", "flying", "chase", "falling", "water", "animals", "people", "places", "teeth", "exam", "death")
 
     Scaffold(
         containerColor = Color.Transparent,
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { Text("New Dream", fontWeight = FontWeight.Bold) },
@@ -129,6 +134,22 @@ fun AddDreamScreen(
                 colors = outlinedFieldColors(),
                 shape = RoundedCornerShape(12.dp)
             )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Voice recording button
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                VoiceInputButton(
+                    snackbarHostState = snackbarHostState,
+                    onRecordingComplete = { transcribedText ->
+                        content = if (content.isBlank()) transcribedText else "$content\n$transcribedText"
+                    }
+                )
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
 

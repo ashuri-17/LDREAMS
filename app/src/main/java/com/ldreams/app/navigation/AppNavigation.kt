@@ -42,6 +42,7 @@ import com.ldreams.app.ui.screens.DreamAnalysisScreen
 import com.ldreams.app.ui.screens.DreamDetailScreen
 import com.ldreams.app.ui.screens.DreamJournalScreen
 import com.ldreams.app.ui.screens.GuidesScreen
+import com.ldreams.app.ui.screens.LucidProgramScreen
 import com.ldreams.app.ui.screens.LucidityTrackerScreen
 import com.ldreams.app.ui.screens.RealityCheckScreen
 import com.ldreams.app.ui.screens.SettingsScreen
@@ -138,6 +139,9 @@ fun AppNavigation() {
             }
             composable("guides") {
                 GuidesScreen(navController = navController)
+            }
+            composable("lucid_program") {
+                LucidProgramScreen(navController = navController)
             }
             composable("settings") {
                 SettingsScreen(navController = navController)

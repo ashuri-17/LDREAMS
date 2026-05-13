@@ -61,7 +61,11 @@ data class DreamAnalysis(
     val averageVividness: Float = 0f,
     val totalDreamsAnalyzed: Int = 0,
     val weeklyDreamCount: Int = 0,
-    val monthlyDreamCount: Int = 0
+    val monthlyDreamCount: Int = 0,
+    val symbols: List<Pair<String, String>> = emptyList(),
+    val tips: List<String> = emptyList(),
+    val clarityScore: Int = 0,
+    val emotionIntensities: Map<String, Float> = emptyMap()
 )
 
 enum class DreamMood(val displayName: String, val emoji: String) {

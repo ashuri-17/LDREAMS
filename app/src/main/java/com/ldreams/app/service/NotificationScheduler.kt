@@ -2,6 +2,7 @@ package com.ldreams.app.service
 
 import android.content.Context
 import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
@@ -169,5 +170,52 @@ object NotificationScheduler {
         workManager.cancelUniqueWork(REALITY_CHECK_WORK)
         workManager.cancelUniqueWork(MORNING_REMINDER_WORK)
         workManager.cancelUniqueWork(BEDTIME_REMINDER_WORK)
+    }
+
+    /**
+     * Schedule a one-time alarm at the given time.
+     * When the alarm fires, [AlarmWorker] starts [AlarmRingingScreen] and
+     * posts a high-priority notification with Snooze / Dismiss actions.
+     *
+     * @param context Application context.
+     * @param hour    Hour of the alarm (0-23).
+     * @param minute  Minute of the alarm (0-59).
+     * @param label   Display label for the alarm (e.g. "Wake up!").
+     */
+    fun scheduleAlarm(context: Context, hour: Int, minute: Int, label: String) {
+        val workManager = WorkManager.getInstance(context)
+        val alarmId = System.currentTimeMillis()
+
+        val cal = Calendar.getInstance().apply {
+            set(Calendar.HOUR_OF_DAY, hour)
+            set(Calendar.MINUTE, minute)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+
+        // If the time has already passed today, schedule for tomorrow
+        val delayMs = if (cal.timeInMillis <= System.currentTimeMillis()) {
+            cal.add(Calendar.DAY_OF_YEAR, 1)
+            cal.timeInMillis - System.currentTimeMillis()
+        } else {
+            cal.timeInMillis - System.currentTimeMillis()
+        }
+
+        val workRequest = OneTimeWorkRequestBuilder<AlarmWorker>()
+            .setInitialDelay(delayMs, TimeUnit.MILLISECONDS)
+            .setInputData(workDataOf(
+                AlarmWorker.KEY_ALARM_ID to alarmId,
+                AlarmWorker.KEY_LABEL to label,
+                AlarmWorker.KEY_HOUR to hour,
+                AlarmWorker.KEY_MINUTE to minute
+            ))
+            .addTag("${AlarmWorker.TAG_ALARM}_${hour}_${minute}")
+            .build()
+
+        workManager.enqueueUniqueWork(
+            "alarm_${hour}_${minute}",
+            ExistingWorkPolicy.REPLACE,
+            workRequest
+        )
     }
 }

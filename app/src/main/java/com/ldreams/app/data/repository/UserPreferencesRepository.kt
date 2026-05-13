@@ -6,6 +6,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -58,6 +59,21 @@ class UserPreferencesRepository @Inject constructor(
         val LONGEST_DREAM_STREAK = intPreferencesKey("longest_dream_streak")
         val USER_LEVEL = intPreferencesKey("user_level")
         val USER_XP = intPreferencesKey("user_xp")
+        val PROGRAM_CURRENT_DAY = intPreferencesKey("program_current_day")
+        val PROGRAM_COMPLETED_DAYS = stringSetPreferencesKey("program_completed_days")
+        val PROGRAM_COMPLETED_TASKS = stringSetPreferencesKey("program_completed_tasks")
+    }
+
+    val programCurrentDay: Flow<Int> = context.dataStore.data.map { prefs ->
+        prefs[Keys.PROGRAM_CURRENT_DAY] ?: 1
+    }
+
+    val programCompletedDays: Flow<Set<String>> = context.dataStore.data.map { prefs ->
+        prefs[Keys.PROGRAM_COMPLETED_DAYS] ?: emptySet()
+    }
+
+    val programCompletedTasks: Flow<Set<String>> = context.dataStore.data.map { prefs ->
+        prefs[Keys.PROGRAM_COMPLETED_TASKS] ?: emptySet()
     }
 
     val preferences: Flow<UserPreferences> = context.dataStore.data.map { prefs ->
@@ -130,6 +146,18 @@ class UserPreferencesRepository @Inject constructor(
 
     suspend fun updatePrivacyLock(enabled: Boolean) {
         context.dataStore.edit { it[Keys.PRIVACY_LOCK_ENABLED] = enabled }
+    }
+
+    suspend fun updateProgramCurrentDay(day: Int) {
+        context.dataStore.edit { it[Keys.PROGRAM_CURRENT_DAY] = day }
+    }
+
+    suspend fun updateProgramCompletedDays(days: Set<String>) {
+        context.dataStore.edit { it[Keys.PROGRAM_COMPLETED_DAYS] = days }
+    }
+
+    suspend fun updateProgramCompletedTasks(tasks: Set<String>) {
+        context.dataStore.edit { it[Keys.PROGRAM_COMPLETED_TASKS] = tasks }
     }
 
     suspend fun addXp(xp: Int) {
