@@ -90,8 +90,13 @@ jobs:
           KEY_ALIAS: ldreams
           KEY_PASSWORD: ldreams123
 
+      - name: Get app version
+        run: |
+          APP_VERSION=$(grep "versionName" app/build.gradle.kts | sed 's/.*"\(.*\)".*/\1/')
+          echo "APP_VERSION=$APP_VERSION" >> $GITHUB_ENV
+
       - name: Create Release Tag
-        run: echo "RELEASE_TAG=v1.0.0-$(date +'%Y%m%d-%H%M')" >> $GITHUB_ENV
+        run: echo "RELEASE_TAG=v${{ env.APP_VERSION }}-$(date +'%Y%m%d-%H%M')" >> $GITHUB_ENV
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
