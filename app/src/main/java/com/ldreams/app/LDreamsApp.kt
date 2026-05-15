@@ -1,20 +1,70 @@
 package com.ldreams.app
 
 import android.app.Application
-import android.media.AudioAttributes
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.content.Intent
+import android.media.AudioAttributes
 import android.media.RingtoneManager
+import android.net.Uri
 import android.os.Build
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import com.ldreams.app.service.NotificationScheduler
+import com.ldreams.app.service.UpdateChecker
 import dagger.hilt.android.HiltAndroidApp
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 
 @HiltAndroidApp
 class LDreamsApp : Application() {
+    private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
     override fun onCreate() {
         super.onCreate()
         createNotificationChannels()
         scheduleDefaultNotifications()
+        checkForUpdatesSilently()
+    }
+
+    private fun checkForUpdatesSilently() {
+        appScope.launch {
+            val update = UpdateChecker.checkForUpdate()
+            if (update != null && update.isAvailable) {
+                val alreadyNotified = getSharedPreferences("ldreams_prefs", MODE_PRIVATE)
+                    .getString("last_update_notified", "") == update.latestVersion
+                if (!alreadyNotified) {
+                    postUpdateNotification(update.latestVersion, update.downloadUrl)
+                    getSharedPreferences("ldreams_prefs", MODE_PRIVATE).edit()
+                        .putString("last_update_notified", update.latestVersion).apply()
+                }
+            }
+        }
+    }
+
+    private fun postUpdateNotification(version: String, downloadUrl: String) {
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(downloadUrl)).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        }
+        val pendingIntent = android.app.PendingIntent.getActivity(
+            this, 0, intent,
+            android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val notification = NotificationCompat.Builder(this, CHANNEL_UPDATES)
+            .setSmallIcon(android.R.drawable.ic_dialog_info)
+            .setContentTitle("LDREAMS Update Available")
+            .setContentText("Version $version is ready to download")
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setAutoCancel(true)
+            .setContentIntent(pendingIntent)
+            .build()
+
+        try {
+            NotificationManagerCompat.from(this).notify(9999, notification)
+        } catch (_: SecurityException) {}
     }
 
     private fun createNotificationChannels() {
@@ -64,9 +114,17 @@ class LDreamsApp : Application() {
             setSound(notificationSoundUri, notificationAudioAttrs)
         }
 
+        val updatesChannel = NotificationChannel(
+            CHANNEL_UPDATES,
+            "App Updates",
+            NotificationManager.IMPORTANCE_DEFAULT
+        ).apply {
+            description = "New version available notifications"
+        }
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             notificationManager.createNotificationChannels(
-                listOf(realityCheckChannel, morningReminderChannel, bedtimeChannel)
+                listOf(realityCheckChannel, morningReminderChannel, bedtimeChannel, updatesChannel)
             )
         }
     }
@@ -81,5 +139,6 @@ class LDreamsApp : Application() {
         const val CHANNEL_REALITY_CHECK = "reality_checks"
         const val CHANNEL_MORNING_REMINDER = "morning_reminders"
         const val CHANNEL_BEDTIME = "bedtime_reminders"
+        const val CHANNEL_UPDATES = "app_updates"
     }
 }
