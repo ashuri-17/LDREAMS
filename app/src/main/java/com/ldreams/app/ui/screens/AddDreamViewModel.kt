@@ -7,6 +7,7 @@ import com.ldreams.app.data.repository.DreamRepository
 import com.ldreams.app.data.repository.UserPreferencesRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import java.util.Calendar
 import javax.inject.Inject
 
 @HiltViewModel
@@ -79,9 +80,47 @@ class AddDreamViewModel @Inject constructor(
     }
 
     private suspend fun updateStreak() {
-        val prefs = preferencesRepository.preferences
-        // Simple streak update logic
-        val currentStreak = 1 // In production, check consecutive days
-        preferencesRepository.updateStreak(currentStreak, maxOf(currentStreak, 0))
+        val dreams = dreamRepository.getAllDreamsList()
+        if (dreams.isEmpty()) return
+
+        // Get unique dream dates sorted as "YYYY-DOY" strings
+        val dateSet = dreams.map { dream ->
+            val cal = Calendar.getInstance()
+            cal.time = dream.timestamp
+            "${cal.get(Calendar.YEAR)}-${cal.get(Calendar.DAY_OF_YEAR)}"
+        }.distinct().sorted()
+
+        if (dateSet.isEmpty()) return
+
+        val cal = Calendar.getInstance()
+        val today = "${cal.get(Calendar.YEAR)}-${cal.get(Calendar.DAY_OF_YEAR)}"
+        cal.add(Calendar.DAY_OF_YEAR, -1)
+        val yesterday = "${cal.get(Calendar.YEAR)}-${cal.get(Calendar.DAY_OF_YEAR)}"
+
+        val lastDate = dateSet.last()
+        // Streak only counts if the most recent dream is from today or yesterday
+        if (lastDate != today && lastDate != yesterday) {
+            preferencesRepository.updateStreak(0, 0)
+            return
+        }
+
+        var streak = 0
+        var expected = lastDate
+        for (i in dateSet.indices.reversed()) {
+            if (dateSet[i] == expected) {
+                streak++
+                val parts = expected.split("-")
+                val prevCal = Calendar.getInstance().apply {
+                    set(Calendar.YEAR, parts[0].toInt())
+                    set(Calendar.DAY_OF_YEAR, parts[1].toInt())
+                    add(Calendar.DAY_OF_YEAR, -1)
+                }
+                expected = "${prevCal.get(Calendar.YEAR)}-${prevCal.get(Calendar.DAY_OF_YEAR)}"
+            } else {
+                break
+            }
+        }
+
+        preferencesRepository.updateStreak(streak, streak)
     }
 }
