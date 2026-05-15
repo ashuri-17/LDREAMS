@@ -37,7 +37,7 @@ object NotificationScheduler {
      */
     fun scheduleRealityChecks(
         context: Context,
-        frequency: Int = 4,
+        frequency: Int = 10,
         startHour: Int = 8,
         endHour: Int = 22
     ) {

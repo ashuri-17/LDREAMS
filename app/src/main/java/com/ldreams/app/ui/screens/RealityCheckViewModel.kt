@@ -43,6 +43,8 @@ class RealityCheckViewModel @Inject constructor(
 
     fun performCheck() {
         viewModelScope.launch {
+            val alreadyDone = repository.getTodayCompletedCountSuspend()
+            if (alreadyDone >= 10) return@launch // max 10 per day
             repository.recordCheck(completed = true)
         }
     }

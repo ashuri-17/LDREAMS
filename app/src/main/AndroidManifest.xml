@@ -42,6 +42,15 @@
             android:theme="@style/Theme.LDreams"
             android:turnScreenOn="true" />
 
+        <!-- Reality check full-screen popup: launches over lock screen -->
+        <activity
+            android:name=".ui.screens.RealityCheckActivity"
+            android:exported="false"
+            android:showOnLockScreen="true"
+            android:showWhenLocked="true"
+            android:theme="@style/Theme.LDreams"
+            android:turnScreenOn="true" />
+
         <!-- Handles alarm notification action buttons (Snooze / Dismiss) -->
         <receiver
             android:name=".service.AlarmActionReceiver"

@@ -18,7 +18,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
@@ -41,6 +43,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -151,39 +154,37 @@ fun AddDreamScreen(
                 )
             }
 
+            // Auto-analyze content for lucidity and vividness
+            LaunchedEffect(content) {
+                if (content.isNotBlank()) {
+                    val (luc, viv) = viewModel.analyzeDreamContent(content)
+                    lucidityLevel = luc.toFloat()
+                    vividnessLevel = viv.toFloat()
+                }
+            }
+
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Lucidity slider
-            Text(
-                text = "Lucidity Level: ${lucidityLevel.toInt()}%",
-                style = MaterialTheme.typography.titleSmall,
-                color = NeonPurple
-            )
-            Slider(
-                value = lucidityLevel,
-                onValueChange = { lucidityLevel = it },
-                valueRange = 0f..100f,
-                colors = SliderDefaults.colors(
-                    thumbColor = NeonPurple,
-                    activeTrackColor = NeonPurple
-                )
-            )
-
-            // Vividness slider
-            Text(
-                text = "Vividness Level: ${vividnessLevel.toInt()}%",
-                style = MaterialTheme.typography.titleSmall,
-                color = NeonCyan
-            )
-            Slider(
-                value = vividnessLevel,
-                onValueChange = { vividnessLevel = it },
-                valueRange = 0f..100f,
-                colors = SliderDefaults.colors(
-                    thumbColor = NeonCyan,
-                    activeTrackColor = NeonCyan
-                )
-            )
+            // Auto-detected lucidity and vividness badges
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Card(modifier = Modifier.weight(1f), shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(containerColor = NeonPurple.copy(alpha = 0.15f))) {
+                    Column(modifier = Modifier.padding(12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(Icons.Default.Psychology, contentDescription = null, tint = NeonPurple, modifier = Modifier.size(20.dp))
+                        Text("Lucidity: ${lucidityLevel.toInt()}%", style = MaterialTheme.typography.bodySmall, color = NeonPurple)
+                    }
+                }
+                Card(modifier = Modifier.weight(1f), shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(containerColor = NeonCyan.copy(alpha = 0.15f))) {
+                    Column(modifier = Modifier.padding(12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(Icons.Default.Visibility, contentDescription = null, tint = NeonCyan, modifier = Modifier.size(20.dp))
+                        Text("Vividness: ${vividnessLevel.toInt()}%", style = MaterialTheme.typography.bodySmall, color = NeonCyan)
+                    }
+                }
+            }
 
             Spacer(modifier = Modifier.height(12.dp))
 

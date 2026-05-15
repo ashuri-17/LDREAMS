@@ -2,6 +2,7 @@ package com.ldreams.app.service
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.app.NotificationCompat
@@ -10,9 +11,8 @@ import androidx.core.content.ContextCompat
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.ldreams.app.LDreamsApp
-import com.ldreams.app.data.repository.RealityCheckRepository
+import com.ldreams.app.ui.screens.RealityCheckActivity
 import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
 import kotlin.random.Random
 
 class NotificationWorker(
@@ -21,6 +21,19 @@ class NotificationWorker(
 ) : CoroutineWorker(context, params) {
 
     override suspend fun doWork(): Result {
+        val type = inputData.getString("type") ?: "reality_check"
+        val message = inputData.getString("message") ?: getDefaultMessage(type)
+
+        if (type == "reality_check") {
+            // Launch full-screen popup instead of notification
+            val intent = Intent(applicationContext, RealityCheckActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                putExtra("message", message)
+            }
+            applicationContext.startActivity(intent)
+            return Result.success()
+        }
+
         // On Android 13+, POST_NOTIFICATIONS runtime permission is required
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(
@@ -31,9 +44,6 @@ class NotificationWorker(
                 return Result.failure()
             }
         }
-
-        val type = inputData.getString("type") ?: "reality_check"
-        val message = inputData.getString("message") ?: getDefaultMessage(type)
 
         val channelId = when (type) {
             "morning" -> LDreamsApp.CHANNEL_MORNING_REMINDER

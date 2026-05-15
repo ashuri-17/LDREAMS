@@ -79,7 +79,7 @@ class UserPreferencesRepository @Inject constructor(
     val preferences: Flow<UserPreferences> = context.dataStore.data.map { prefs ->
         UserPreferences(
             realityCheckEnabled = prefs[Keys.REALITY_CHECK_ENABLED] ?: true,
-            realityCheckFrequency = prefs[Keys.REALITY_CHECK_FREQUENCY] ?: 4,
+            realityCheckFrequency = prefs[Keys.REALITY_CHECK_FREQUENCY] ?: 10,
             realityCheckStartHour = prefs[Keys.REALITY_CHECK_START_HOUR] ?: 8,
             realityCheckEndHour = prefs[Keys.REALITY_CHECK_END_HOUR] ?: 22,
             morningReminderEnabled = prefs[Keys.MORNING_REMINDER_ENABLED] ?: true,

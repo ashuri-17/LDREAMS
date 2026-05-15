@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.Psychology
+import androidx.compose.material.icons.filled.SystemUpdate
 import androidx.compose.material.icons.filled.Vibration
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.Card
@@ -33,11 +34,17 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -54,8 +61,11 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import kotlinx.coroutines.launch
 import com.ldreams.app.ui.components.DreamBackground
 import com.ldreams.app.ui.components.PermissionBanner
+import com.ldreams.app.service.AppUpdate
+import com.ldreams.app.service.UpdateChecker
 import com.ldreams.app.ui.theme.NeonCyan
 import com.ldreams.app.ui.theme.NeonPurple
 
@@ -67,6 +77,9 @@ fun SettingsScreen(
 ) {
     val prefs by viewModel.preferences.collectAsState(initial = com.ldreams.app.data.repository.UserPreferences())
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var isCheckingUpdate by remember { mutableStateOf(false) }
+    var updateInfo by remember { mutableStateOf<AppUpdate?>(null) }
     val notificationPermissionGranted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         ContextCompat.checkSelfPermission(
             context,
@@ -192,6 +205,85 @@ fun SettingsScreen(
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
+
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            // Check for Updates button
+                            Button(
+                                onClick = {
+                                    isCheckingUpdate = true
+                                    scope.launch {
+                                        val result = UpdateChecker.checkForUpdate()
+                                        updateInfo = result
+                                        isCheckingUpdate = false
+                                    }
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = ButtonDefaults.buttonColors(containerColor = NeonPurple),
+                                shape = RoundedCornerShape(14.dp),
+                                enabled = !isCheckingUpdate
+                            ) {
+                                if (isCheckingUpdate) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(20.dp),
+                                        color = Color.White,
+                                        strokeWidth = 2.dp
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text("Checking...")
+                                } else {
+                                    Icon(Icons.Default.SystemUpdate, contentDescription = null)
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text("Check for Updates", fontWeight = FontWeight.SemiBold)
+                                }
+                            }
+
+                            // Update result
+                            updateInfo?.let { update ->
+                                Spacer(modifier = Modifier.height(8.dp))
+                                if (update.isAvailable) {
+                                    Card(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        shape = RoundedCornerShape(12.dp),
+                                        colors = CardDefaults.cardColors(
+                                            containerColor = NeonCyan.copy(alpha = 0.15f)
+                                        )
+                                    ) {
+                                        Column(modifier = Modifier.padding(12.dp)) {
+                                            Text(
+                                                text = "New version ${update.latestVersion} available!",
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                fontWeight = FontWeight.SemiBold,
+                                                color = NeonCyan
+                                            )
+                                            if (update.releaseNotes.isNotBlank()) {
+                                                Text(
+                                                    text = update.releaseNotes,
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                    maxLines = 3
+                                                )
+                                            }
+                                            Spacer(modifier = Modifier.height(8.dp))
+                                            Button(
+                                                onClick = { UpdateChecker.openDownloadPage(context, update.downloadUrl) },
+                                                modifier = Modifier.fillMaxWidth(),
+                                                colors = ButtonDefaults.buttonColors(containerColor = NeonCyan),
+                                                shape = RoundedCornerShape(14.dp)
+                                            ) {
+                                                Text("Download Update", fontWeight = FontWeight.SemiBold)
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    Text(
+                                        text = "You're up to date!",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = NeonCyan,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                }
+                            }
                         }
                     }
                 }

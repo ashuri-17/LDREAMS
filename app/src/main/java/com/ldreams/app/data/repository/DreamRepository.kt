@@ -45,9 +45,10 @@ class DreamRepository @Inject constructor(
 
     fun getLucidDreams(): Flow<List<DreamEntry>> = dreamDao.getLucidDreams()
 
-    suspend fun saveDream(dream: DreamEntry): Long {
+    suspend fun saveDream(dream: DreamEntry): Int {
         val xp = calculateXp(dream)
-        return dreamDao.insertDream(dream.copy(xpEarned = xp))
+        dreamDao.insertDream(dream.copy(xpEarned = xp))
+        return xp
     }
 
     suspend fun updateDream(dream: DreamEntry) = dreamDao.updateDream(dream)
