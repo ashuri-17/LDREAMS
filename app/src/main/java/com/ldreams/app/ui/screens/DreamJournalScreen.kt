@@ -261,8 +261,8 @@ fun DreamJournalScreen(
                                                 dream = dream,
                                                 onClick = {
                                                     navController.navigate("dream_detail/${dream.id}")
-                                                }
-                                            )
+                                                },
+                                                )
                                         }
                                     }
                                 }
@@ -328,7 +328,8 @@ fun DreamJournalScreen(
                                 items(displayList, key = { it.id }) { dream ->
                                     DreamCard(
                                         dream = dream,
-                                        onClick = { navController.navigate("dream_detail/${dream.id}") }
+                                        onClick = { navController.navigate("dream_detail/${dream.id}") },
+                                        modifier = Modifier
                                     )
                                 }
                             }

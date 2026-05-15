@@ -1,6 +1,8 @@
 package com.ldreams.app.navigation
 
 import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -32,6 +34,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -60,6 +63,35 @@ val bottomNavItems = listOf(
     BottomNavItem("Analysis", "analysis", Icons.Filled.AutoAwesome, Icons.Outlined.AutoAwesome),
     BottomNavItem("Lucidity", "lucidity", Icons.Filled.Psychology, Icons.Outlined.Psychology),
     BottomNavItem("Settings", "settings", Icons.Filled.Settings, Icons.Outlined.BarChart)
+)
+
+// ---- Navigation transition helpers ----
+
+private fun AnimatedContentTransitionScope<NavBackStackEntry>.slideEnter(): EnterTransition {
+    return slideIntoContainer(
+        towards = AnimatedContentTransitionScope.SlideDirection.Up,
+        animationSpec = tween(400)
+    ) + fadeIn(animationSpec = tween(400))
+}
+
+private fun AnimatedContentTransitionScope<NavBackStackEntry>.slideExit(): ExitTransition {
+    return slideOutOfContainer(
+        towards = AnimatedContentTransitionScope.SlideDirection.Down,
+        animationSpec = tween(400)
+    ) + fadeOut(animationSpec = tween(400))
+}
+
+private fun AnimatedContentTransitionScope<NavBackStackEntry>.fadeEnter(): EnterTransition {
+    return fadeIn(animationSpec = tween(400))
+}
+
+private fun AnimatedContentTransitionScope<NavBackStackEntry>.fadeExit(): ExitTransition {
+    return fadeOut(animationSpec = tween(400))
+}
+
+/** Routes that are drill-down sub-pages (not bottom-nav tabs) */
+private val drillDownRoutes = setOf(
+    "add_dream", "dream_detail/{dreamId}", "reality_checks", "guides", "lucid_program"
 )
 
 @Composable
@@ -115,36 +147,89 @@ fun AppNavigation() {
             startDestination = "dashboard",
             modifier = Modifier.padding(paddingValues)
         ) {
-            composable("dashboard") {
+            // ---- Tab screens: simple fade transitions ----
+            composable(
+                "dashboard",
+                enterTransition = { fadeEnter() },
+                exitTransition = { fadeExit() }
+            ) {
                 DashboardScreen(navController = navController)
             }
-            composable("journal") {
+            composable(
+                "journal",
+                enterTransition = { fadeEnter() },
+                exitTransition = { fadeExit() }
+            ) {
                 DreamJournalScreen(navController = navController)
             }
-            composable("add_dream") {
+            composable(
+                "analysis",
+                enterTransition = { fadeEnter() },
+                exitTransition = { fadeExit() }
+            ) {
+                DreamAnalysisScreen(navController = navController)
+            }
+            composable(
+                "lucidity",
+                enterTransition = { fadeEnter() },
+                exitTransition = { fadeExit() }
+            ) {
+                LucidityTrackerScreen(navController = navController)
+            }
+            composable(
+                "settings",
+                enterTransition = { fadeEnter() },
+                exitTransition = { fadeExit() }
+            ) {
+                SettingsScreen(navController = navController)
+            }
+
+            // ---- Drill-down screens: slide-up/slide-down + fade ----
+            composable(
+                "add_dream",
+                enterTransition = { slideEnter() },
+                exitTransition = { slideExit() },
+                popEnterTransition = { fadeEnter() },
+                popExitTransition = { fadeExit() }
+            ) {
                 AddDreamScreen(navController = navController)
             }
-            composable("dream_detail/{dreamId}") { backStackEntry ->
+            composable(
+                "dream_detail/{dreamId}",
+                enterTransition = { slideEnter() },
+                exitTransition = { slideExit() },
+                popEnterTransition = { fadeEnter() },
+                popExitTransition = { fadeExit() }
+            ) { backStackEntry ->
                 val dreamId = backStackEntry.arguments?.getString("dreamId")?.toLongOrNull() ?: 0L
                 DreamDetailScreen(dreamId = dreamId, navController = navController)
             }
-            composable("analysis") {
-                DreamAnalysisScreen(navController = navController)
-            }
-            composable("lucidity") {
-                LucidityTrackerScreen(navController = navController)
-            }
-            composable("reality_checks") {
+            composable(
+                "reality_checks",
+                enterTransition = { slideEnter() },
+                exitTransition = { slideExit() },
+                popEnterTransition = { fadeEnter() },
+                popExitTransition = { fadeExit() }
+            ) {
                 RealityCheckScreen(navController = navController)
             }
-            composable("guides") {
+            composable(
+                "guides",
+                enterTransition = { slideEnter() },
+                exitTransition = { slideExit() },
+                popEnterTransition = { fadeEnter() },
+                popExitTransition = { fadeExit() }
+            ) {
                 GuidesScreen(navController = navController)
             }
-            composable("lucid_program") {
+            composable(
+                "lucid_program",
+                enterTransition = { slideEnter() },
+                exitTransition = { slideExit() },
+                popEnterTransition = { fadeEnter() },
+                popExitTransition = { fadeExit() }
+            ) {
                 LucidProgramScreen(navController = navController)
-            }
-            composable("settings") {
-                SettingsScreen(navController = navController)
             }
         }
     }
