@@ -183,7 +183,7 @@ fun SettingsScreen(
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
                             Text(
-                                text = "LDREAMS v1.0.0",
+                                text = "LDREAMS v${context.packageManager.getPackageInfo(context.packageName, 0).versionName}",
                                 style = MaterialTheme.typography.bodyLarge,
                                 fontWeight = FontWeight.Medium,
                                 color = MaterialTheme.colorScheme.onSurface
