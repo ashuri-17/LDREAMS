@@ -38,15 +38,24 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import android.Manifest
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Build
+import android.provider.Settings
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.ldreams.app.ui.components.DreamBackground
+import com.ldreams.app.ui.components.PermissionBanner
 import com.ldreams.app.ui.theme.NeonCyan
 import com.ldreams.app.ui.theme.NeonPurple
 
@@ -57,6 +66,13 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val prefs by viewModel.preferences.collectAsState(initial = com.ldreams.app.data.repository.UserPreferences())
+    val context = LocalContext.current
+    val notificationPermissionGranted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.POST_NOTIFICATIONS
+        ) == PackageManager.PERMISSION_GRANTED
+    } else true
 
     Scaffold(
         containerColor = Color.Transparent,
@@ -79,6 +95,22 @@ fun SettingsScreen(
                     .verticalScroll(rememberScrollState())
                     .padding(16.dp)
             ) {
+                // Notification permission status
+                if (!notificationPermissionGranted) {
+                    PermissionBanner(
+                        title = "Notifications Disabled",
+                        description = "Enable notification access to receive reality check reminders, morning alerts, and bedtime prompts",
+                        isGranted = false,
+                        onRequestPermission = {
+                            val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                                data = Uri.fromParts("package", context.packageName, null)
+                            }
+                            context.startActivity(intent)
+                        }
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
+
                 // Notification Settings
                 SettingsSection("Notifications") {
                     SettingsToggle(

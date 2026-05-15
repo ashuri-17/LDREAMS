@@ -1,9 +1,12 @@
 package com.ldreams.app.service
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.ldreams.app.LDreamsApp
@@ -18,6 +21,17 @@ class NotificationWorker(
 ) : CoroutineWorker(context, params) {
 
     override suspend fun doWork(): Result {
+        // On Android 13+, POST_NOTIFICATIONS runtime permission is required
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(
+                    applicationContext,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                return Result.failure()
+            }
+        }
+
         val type = inputData.getString("type") ?: "reality_check"
         val message = inputData.getString("message") ?: getDefaultMessage(type)
 
