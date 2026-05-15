@@ -76,7 +76,7 @@ fun AddDreamScreen(
     var title by remember { mutableStateOf("") }
     var content by remember { mutableStateOf("") }
     var lucidityLevel by remember { mutableFloatStateOf(0f) }
-    var vividnessLevel by remember { mutableFloatStateOf(50f) }
+    var vividnessLevel by remember { mutableFloatStateOf(0f) }
     var isLucid by remember { mutableStateOf(false) }
     var isNightmare by remember { mutableStateOf(false) }
     var selectedMood by remember { mutableStateOf(DreamMood.NEUTRAL) }
