@@ -71,7 +71,4 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    fun togglePrivacyLock(enabled: Boolean) {
-        viewModelScope.launch { preferencesRepository.updatePrivacyLock(enabled) }
-    }
 }

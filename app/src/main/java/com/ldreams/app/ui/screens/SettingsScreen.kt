@@ -17,7 +17,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Bedtime
-import androidx.compose.material.icons.filled.Lock
+
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.NotificationsActive
@@ -167,19 +167,6 @@ fun SettingsScreen(
                         icon = Icons.Default.Vibration,
                         checked = prefs.vibrationEnabled,
                         onCheckedChange = { viewModel.toggleVibration(it) }
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Privacy
-                SettingsSection("Privacy") {
-                    SettingsToggle(
-                        title = "Privacy Lock",
-                        subtitle = "Require authentication to open app",
-                        icon = Icons.Default.Lock,
-                        checked = prefs.privacyLockEnabled,
-                        onCheckedChange = { viewModel.togglePrivacyLock(it) }
                     )
                 }
 

@@ -1,11 +1,10 @@
 package com.ldreams.app
 
-import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.animation.Crossfade
+import androidx.lifecycle.lifecycleScope
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,12 +25,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.datastore.preferences.core.booleanPreferencesKey
-import androidx.lifecycle.lifecycleScope
-import com.ldreams.app.data.repository.dataStore
+
 import com.ldreams.app.navigation.AppNavigation
 import com.ldreams.app.ui.components.DreamBackground
-import com.ldreams.app.ui.screens.PrivacyLockScreen
 import com.ldreams.app.ui.theme.LDreamsTheme
 import com.ldreams.app.ui.theme.NeonCyan
 import dagger.hilt.android.AndroidEntryPoint
@@ -41,28 +37,11 @@ import kotlinx.coroutines.launch
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    companion object {
-        private val PRIVACY_LOCK_KEY = booleanPreferencesKey("privacy_lock_enabled")
-    }
-
     private var showSplash by mutableStateOf(true)
-    private var showLockScreen by mutableStateOf(false)
-    private var privacyLockEnabled by mutableStateOf(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-
-        // Observe privacy lock preference from DataStore
-        lifecycleScope.launch {
-            dataStore.data.collect { prefs ->
-                privacyLockEnabled = prefs[PRIVACY_LOCK_KEY] ?: false
-                // Auto-dismiss lock screen when toggle is turned off
-                if (!privacyLockEnabled) {
-                    showLockScreen = false
-                }
-            }
-        }
 
         // Auto-dismiss splash after 1.5 seconds
         lifecycleScope.launch {
@@ -73,36 +52,13 @@ class MainActivity : ComponentActivity() {
         setContent {
             LDreamsTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    Crossfade(
-                        targetState = when {
-                            showSplash -> 0
-                            showLockScreen -> 1
-                            else -> 2
-                        },
-                        label = "main_transition"
-                    ) { state ->
-                        when (state) {
-                            0 -> SplashScreen()
-                            1 -> PrivacyLockScreen(onUnlock = { showLockScreen = false })
-                            2 -> AppNavigation()
-                        }
+                    if (showSplash) {
+                        SplashScreen()
+                    } else {
+                        AppNavigation()
                     }
                 }
             }
-        }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        checkPrivacyLock()
-    }
-
-    private fun checkPrivacyLock() {
-        if (!privacyLockEnabled) return
-        val prefs = getSharedPreferences("ldreams_privacy", Context.MODE_PRIVATE)
-        val unlockTime = prefs.getLong("unlock_time", 0L)
-        if (System.currentTimeMillis() - unlockTime > 5000) {
-            showLockScreen = true
         }
     }
 
@@ -142,5 +98,4 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-
 }
