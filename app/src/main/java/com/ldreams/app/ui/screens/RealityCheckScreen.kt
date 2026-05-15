@@ -139,14 +139,13 @@ fun RealityCheckScreen(
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "${stats.todayCompleted} / ${stats.todayTotal}",
+                            text = "${stats.todayCompleted} / 10",
                             fontSize = 48.sp,
                             fontWeight = FontWeight.Bold,
-                            color = if (stats.todayCompleted == stats.todayTotal && stats.todayTotal > 0)
-                                LucidGreen else NeonPurple
+                            color = if (stats.todayCompleted >= 10) LucidGreen else NeonPurple
                         )
                         Text(
-                            text = "checks completed",
+                            text = "checks completed today",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
