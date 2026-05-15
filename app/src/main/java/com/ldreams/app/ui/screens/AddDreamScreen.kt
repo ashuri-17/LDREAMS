@@ -176,14 +176,14 @@ fun AddDreamScreen(
                     colors = CardDefaults.cardColors(containerColor = NeonPurple.copy(alpha = 0.15f))) {
                     Column(modifier = Modifier.padding(12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                         Icon(Icons.Default.Psychology, contentDescription = null, tint = NeonPurple, modifier = Modifier.size(20.dp))
-                        Text("Lucidity: ${lucidityLevel.toInt()}%", style = MaterialTheme.typography.bodySmall, color = NeonPurple)
+                        Text("Lucidity: ${if (content.isBlank()) "--" else "${lucidityLevel.toInt()}%"}", style = MaterialTheme.typography.bodyMedium, color = NeonPurple)
                     }
                 }
                 Card(modifier = Modifier.weight(1f), shape = RoundedCornerShape(12.dp),
                     colors = CardDefaults.cardColors(containerColor = NeonCyan.copy(alpha = 0.15f))) {
                     Column(modifier = Modifier.padding(12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                         Icon(Icons.Default.Visibility, contentDescription = null, tint = NeonCyan, modifier = Modifier.size(20.dp))
-                        Text("Vividness: ${vividnessLevel.toInt()}%", style = MaterialTheme.typography.bodySmall, color = NeonCyan)
+                        Text("Vividness: ${if (content.isBlank()) "--" else "${vividnessLevel.toInt()}%"}", style = MaterialTheme.typography.bodyMedium, color = NeonCyan)
                     }
                 }
             }
