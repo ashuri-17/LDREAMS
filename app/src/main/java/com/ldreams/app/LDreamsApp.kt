@@ -25,6 +25,7 @@ class LDreamsApp : Application() {
     override fun onCreate() {
         super.onCreate()
         createNotificationChannels()
+        UpdateChecker.init(this)
         scheduleDefaultNotifications()
         checkForUpdatesSilently()
     }

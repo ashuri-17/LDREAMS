@@ -1,7 +1,9 @@
 package com.ldreams.app.service
 
+import android.app.Application
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.net.Uri
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -18,7 +20,12 @@ data class AppUpdate(
 
 object UpdateChecker {
     private const val GITHUB_API = "https://api.github.com/repos/ashuri-17/LDREAMS/releases/latest"
-    private const val CURRENT_VERSION = "1.0.0"
+    private const val LAST_CHECKED_ID = "last_checked_release_id"
+    private lateinit var prefs: SharedPreferences
+
+    fun init(context: Context) {
+        prefs = context.getSharedPreferences("ldreams_update", Context.MODE_PRIVATE)
+    }
 
     suspend fun checkForUpdate(): AppUpdate? = withContext(Dispatchers.IO) {
         try {
@@ -31,7 +38,8 @@ object UpdateChecker {
             conn.disconnect()
 
             val json = JSONObject(body)
-            val tagName = json.getString("tag_name") // "v1.0.0-20260514"
+            val tagName = json.getString("tag_name") // "v1.0.0-20260514-1234"
+            val releaseId = json.getLong("id") // monotonically increasing
             val version = tagName.removePrefix("v").substringBefore("-")
             val bodyText = json.getString("body")
             val assets = json.getJSONArray("assets")
@@ -39,7 +47,13 @@ object UpdateChecker {
                 assets.getJSONObject(0).getString("browser_download_url")
             } else ""
 
-            val isAvailable = compareVersions(version, CURRENT_VERSION) > 0
+            // Compare using release ID (always increases with each release)
+            val lastCheckedId = getLastCheckedReleaseId()
+            val isAvailable = releaseId > lastCheckedId
+
+            if (isAvailable) {
+                saveLastCheckedReleaseId(releaseId)
+            }
 
             AppUpdate(
                 latestVersion = version,
@@ -52,18 +66,16 @@ object UpdateChecker {
         }
     }
 
+    private fun getLastCheckedReleaseId(): Long {
+        return prefs.getLong(LAST_CHECKED_ID, 0L)
+    }
+
+    private fun saveLastCheckedReleaseId(id: Long) {
+        prefs.edit().putLong(LAST_CHECKED_ID, id).apply()
+    }
+
     fun openDownloadPage(context: Context, url: String) {
         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
         context.startActivity(intent)
-    }
-
-    private fun compareVersions(v1: String, v2: String): Int {
-        val parts1 = v1.split(".").map { it.toIntOrNull() ?: 0 }
-        val parts2 = v2.split(".").map { it.toIntOrNull() ?: 0 }
-        for (i in 0 until maxOf(parts1.size, parts2.size)) {
-            val diff = (parts1.getOrElse(i) { 0 }) - (parts2.getOrElse(i) { 0 })
-            if (diff != 0) return diff
-        }
-        return 0
     }
 }
