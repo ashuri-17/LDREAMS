@@ -8,6 +8,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.AnimatedVisibility
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Arrangement
