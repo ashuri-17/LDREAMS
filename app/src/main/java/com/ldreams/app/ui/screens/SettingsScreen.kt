@@ -1,5 +1,6 @@
 package com.ldreams.app.ui.screens
 
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -52,6 +53,7 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -88,6 +90,11 @@ fun SettingsScreen(
         ) == PackageManager.PERMISSION_GRANTED
     } else true
 
+    // Permission launcher for Android 13+ notification permission
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { _ -> /* re-check happens on recomposition */ }
+
     Scaffold(
         containerColor = Color.Transparent,
         topBar = {
@@ -116,10 +123,14 @@ fun SettingsScreen(
                         description = "Enable notification access to receive reality check reminders, morning alerts, and bedtime prompts",
                         isGranted = false,
                         onRequestPermission = {
-                            val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                                data = Uri.fromParts("package", context.packageName, null)
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                            } else {
+                                val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                                    data = Uri.fromParts("package", context.packageName, null)
+                                }
+                                context.startActivity(intent)
                             }
-                            context.startActivity(intent)
                         }
                     )
                     Spacer(modifier = Modifier.height(12.dp))
